@@ -65,21 +65,21 @@ Describes available endpoints, payloads, and sample responses.
 ## 📡 API Endpoints
 
 ```json
-// 1. POST /repository
+1. POST /repository
 {
   "image_name": "yourusername/private-image",
   "tag": "latest",
   "token": "your_dockerhub_token"
 }
-// Response:
+Response:
 {
   "status code": 201,
   "message": "Repository created successfully",
   "id": "d5a61bb0-4713-4b76-b1ad-15f9dbe9c823"
 }
 
-// 2. GET /repository
-// Response:
+2. GET /repository
+Response:
 {
   "status code": 200,
   "message": "Repositories fetched successfully",
@@ -92,8 +92,8 @@ Describes available endpoints, payloads, and sample responses.
   ]
 }
 
-// 3. GET /repository/{repo_id}
-// Response:
+3. GET /repository/{repo_id}
+Response:
 {
   "status code": 200,
   "message": "Repository fetched successfully",
@@ -103,13 +103,13 @@ Describes available endpoints, payloads, and sample responses.
     "tag": "latest"
   }
 }
-// If not found:
+If not found:
 {
   "status code": 404,
   "message": "Repository not found"
 }
 
-<!-- Database Schema: Table design for docker_repositories. -->
+Database Schema: Table design for docker_repositories.
 🗄️ Database Schema
 | Column      | Type   | Description                     |
 | ----------- | ------ | ------------------------------- |
@@ -118,7 +118,7 @@ Describes available endpoints, payloads, and sample responses.
 | tag         | String | Docker image tag                |
 | token       | String | DockerHub access token          |
 
-<!-- Setup instructions to clone and run the project locally. -->
+Setup instructions to clone and run the project locally.
 # Clone the repo
 git clone https://github.com/your-username/your-repo-name.git
 cd your-repo-name
