@@ -109,6 +109,8 @@ If not found:
   "message": "Repository not found"
 }
 
+---
+
 ## 🗄️ Database Schema
 
 Table design for `docker_repositories`:
