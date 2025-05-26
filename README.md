@@ -109,16 +109,22 @@ If not found:
   "message": "Repository not found"
 }
 
-Database Schema: Table design for docker_repositories.
-🗄️ Database Schema
-| Column      | Type   | Description                     |
-| ----------- | ------ | ------------------------------- |
-| id          | UUID   | Unique identifier (Primary Key) |
-| image\_name | String | Docker image name               |
-| tag         | String | Docker image tag                |
-| token       | String | DockerHub access token          |
+## 🗄️ Database Schema
 
-Setup instructions to clone and run the project locally.
+Table design for `docker_repositories`:
+
+| Column     | Type   | Description                      |
+|------------|--------|---------------------------------|
+| id         | UUID   | Unique identifier (Primary Key) |
+| image_name | String | Docker image name               |
+| tag        | String | Docker image tag                |
+| token      | String | DockerHub access token          |
+
+---
+
+## 🛠️ Setup Instructions
+
+```bash
 # Clone the repo
 git clone https://github.com/your-username/your-repo-name.git
 cd your-repo-name
