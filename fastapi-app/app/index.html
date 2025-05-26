@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DockerHub Repository Manager</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --primary-color: #0078d7;
+    --primary-hover: #005a9e;
+    --success-color: #28a745;
+    --error-color: #dc3545;
+    --warning-color: #ffc107;
+    --light-gray: #f8f9fa;
+    --dark-gray: #343a40;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  .container {
+    background: white;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    width: 800px;
+    max-width: 95vw;
+    height: 650px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+  }
+  
+  h1 {
+    text-align: center;
+    color: var(--dark-gray);
+    margin-bottom: 25px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  h1 i {
+    color: var(--primary-color);
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    border-bottom: 2px solid var(--primary-color);
+    margin-bottom: 20px;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  
+  .tab {
+    padding: 12px 25px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #555;
+    border: 2px solid transparent;
+    border-bottom: none;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .tab.active {
+    border-color: var(--primary-color) var(--primary-color) white var(--primary-color);
+    background: white;
+    color: var(--primary-color);
+    border-bottom: 2px solid white;
+  }
+  
+  .tab:not(.active):hover {
+    background: #e6f0fa;
+    color: var(--primary-color);
+  }
+
+  /* Content areas */
+  .tab-content {
+    display: none;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 5px;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  label {
+    font-weight: 600;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  input[type=text], input[type=password] {
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    transition: all 0.2s;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+  }
+  
+  input[type=text]:focus, input[type=password]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.2);
+  }
+  
+  button {
+    padding: 12px 20px;
+    color: white;
+    border: none;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .primary-btn {
+    background-color: var(--primary-color);
+  }
+  
+  .primary-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+  
+  .secondary-btn {
+    background-color: var(--dark-gray);
+  }
+  
+  .secondary-btn:hover {
+    background-color: #23272b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+  
+  button:active {
+    transform: translateY(0);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    max-width: 700px;
+    margin: 0 auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  }
+  
+  th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  tr:hover {
+    background-color: #f1faff;
+  }
+
+  .message {
+    text-align: center;
+    margin: 15px 0;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .success {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--success-color);
+    border: 1px solid rgba(40, 167, 69, 0.2);
+  }
+  
+  .error {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--error-color);
+    border: 1px solid rgba(220, 53, 69, 0.2);
+  }
+  
+  .info {
+    background-color: rgba(0, 120, 215, 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(0, 120, 215, 0.2);
+  }
+
+  .centered {
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  input#getByIdInput {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    transition: all 0.2s;
+  }
+  
+  input#getByIdInput:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.2);
+  }
+
+  .repo-details {
+    text-align: left;
+    border: 1px solid #eee;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: var(--light-gray);
+    max-width: 500px;
+    margin: 25px auto;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .repo-details p {
+    margin: 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .repo-details strong {
+    color: var(--primary-color);
+    min-width: 100px;
+    display: inline-block;
+  }
+  
+  .loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0, 120, 215, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+  }
+  
+  .empty-state i {
+    font-size: 3rem;
+    color: #ccc;
+    margin-bottom: 15px;
+  }
+  
+  .empty-state p {
+    margin-top: 10px;
+    font-size: 1.1rem;
+  }
+
+  /* Button container styles */
+  .button-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>
+    <i class="fab fa-docker"></i>
+    DockerHub Repository Manager
+  </h1>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="add">
+      <i class="fas fa-plus-circle"></i>
+      Add Repository
+    </div>
+    <div class="tab" data-tab="list">
+      <i class="fas fa-list"></i>
+      List All
+    </div>
+    <div class="tab" data-tab="getById">
+      <i class="fas fa-search"></i>
+      Get By ID
+    </div>
+  </div>
+
+  <div id="add" class="tab-content active">
+    <form id="addRepoForm">
+      <div class="form-group">
+        <label for="imageName">
+          <i class="fas fa-cube"></i>
+          Image Name
+        </label>
+        <input type="text" id="imageName" name="imageName" placeholder="yourusername/my-private-image" required />
+      </div>
+
+      <div class="form-group">
+        <label for="tag">
+          <i class="fas fa-tag"></i>
+          Tag
+        </label>
+        <input type="text" id="tag" name="tag" placeholder="latest" required />
+      </div>
+
+      <div class="form-group">
+        <label for="token">
+          <i class="fas fa-key"></i>
+          DockerHub Token
+        </label>
+        <input type="password" id="token" name="token" placeholder="Your private repo token" required />
+      </div>
+
+      <button type="submit" class="primary-btn">
+        <i class="fas fa-save"></i>
+        Add Repository
+      </button>
+    </form>
+    <div id="addMessage" class="message" style="display:none;"></div>
+  </div>
+
+  <div id="list" class="tab-content">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>ID</th>
+          <th>Image Name</th>
+          <th>Tag</th>
+        </tr>
+      </thead>
+      <tbody id="repoListBody"></tbody>
+    </table>
+    <div id="listMessage" class="message info" style="display:none;">Loading repositories...</div>
+    <div id="emptyListState" class="empty-state" style="display:none;">
+      <i class="fas fa-box-open"></i>
+      <h3>No Repositories Found</h3>
+      <p>Add your first repository using the "Add Repository" tab</p>
+    </div>
+  </div>
+
+  <div id="getById" class="tab-content">
+    <div class="centered">
+      <input type="text" id="getByIdInput" placeholder="Enter repository ID" />
+      <div class="button-container">
+        <button id="getByIdBtn" class="primary-btn">
+          <i class="fas fa-search"></i>
+          Get Repository
+        </button>
+        <button id="clearBtn" class="secondary-btn">
+          <i class="fas fa-eraser"></i>
+          Clear
+        </button>
+      </div>
+      <div id="getByIdMessage" class="message" style="display:none;"></div>
+      <div id="repoDetails" class="repo-details" style="display:none;">
+        <p>
+          <strong><i class="fas fa-id-card"></i> ID:</strong> 
+          <span id="repoId"></span>
+        </p>
+        <p>
+          <strong><i class="fas fa-cube"></i> Image Name:</strong> 
+          <span id="repoImageName"></span>
+        </p>
+        <p>
+          <strong><i class="fas fa-tag"></i> Tag:</strong> 
+          <span id="repoTag"></span>
+        </p>
+      </div>
+      <div id="emptySearchState" class="empty-state" style="display:none;">
+        <i class="fas fa-search"></i>
+        <h3>Search for a Repository</h3>
+        <p>Enter a repository ID to view its details</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tabs switching logic
+  const tabs = document.querySelectorAll(".tab");
+  const tabContents = document.querySelectorAll(".tab-content");
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      // Remove active classes
+      tabs.forEach(t => t.classList.remove("active"));
+      tabContents.forEach(tc => tc.classList.remove("active"));
+
+      // Add active class to clicked tab & content
+      tab.classList.add("active");
+      document.getElementById(tab.dataset.tab).classList.add("active");
+
+      // Clear messages when switching tabs
+      hideMessage("addMessage");
+      hideMessage("listMessage");
+      hideMessage("getByIdMessage");
+      document.getElementById("repoDetails").style.display = "none";
+
+      if (tab.dataset.tab === "list") {
+        fetchAllRepos();
+      } else if (tab.dataset.tab === "getById") {
+        document.getElementById("emptySearchState").style.display = "block";
+      }
+    });
+  });
+
+  // Add repository form submit
+  const addRepoForm = document.getElementById("addRepoForm");
+  addRepoForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const image_name = document.getElementById("imageName").value.trim();
+    const tag = document.getElementById("tag").value.trim();
+    const token = document.getElementById("token").value.trim();
+
+    if (!image_name || !tag || !token) {
+      showMessage("addMessage", "Please fill all fields.", "error");
+      return;
+    }
+
+    const submitBtn = addRepoForm.querySelector("button[type='submit']");
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<div class="loading"></div> Processing...';
+    submitBtn.disabled = true;
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/repository", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ image_name, tag, token })
+      });
+      
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.detail || "Failed to add repository");
+      }
+      
+      const data = await response.json();
+      showMessage("addMessage", `Repository added successfully! ID: ${data.id}`, "success");
+      addRepoForm.reset();
+      
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => {
+        hideMessage("addMessage");
+      }, 5000);
+    } catch (error) {
+      showMessage("addMessage", error.message, "error");
+    } finally {
+      submitBtn.innerHTML = originalBtnText;
+      submitBtn.disabled = false;
+    }
+  });
+
+    // Fetch and list all repositories
+    async function fetchAllRepos() {
+    const tbody = document.getElementById("repoListBody");
+    const emptyState = document.getElementById("emptyListState");
+    tbody.innerHTML = "";
+    emptyState.style.display = "none";
+    showMessage("listMessage", "Loading repositories...", "info");
+    
+    try {
+        const response = await fetch("http://127.0.0.1:8000/repository");
+        if (!response.ok) throw new Error("Failed to fetch all repositories");
+        const responseData = await response.json();
+        
+        // Extract the repositories array from the response object
+        const repos = responseData.repositories || [];
+
+        hideMessage("listMessage");
+
+        if (repos.length === 0) {
+        emptyState.style.display = "block";
+        return;
+        }
+
+        repos.forEach((repo, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${repo.id}</td>
+            <td>${repo.image_name}</td>
+            <td>${repo.tag}</td>
+        `;
+        tbody.appendChild(tr);
+        });
+    } catch (error) {
+        showMessage("listMessage", error.message, "error");
+    }
+    }
+
+  // Get repository by ID
+  document.getElementById("getByIdBtn").addEventListener("click", async () => {
+    const id = document.getElementById("getByIdInput").value.trim();
+    const detailsDiv = document.getElementById("repoDetails");
+    const emptyState = document.getElementById("emptySearchState");
+    detailsDiv.style.display = "none";
+    emptyState.style.display = "none";
+    hideMessage("getByIdMessage");
+
+    if (!id) {
+      showMessage("getByIdMessage", "Please enter an ID.", "error");
+      return;
+    }
+
+    const getByIdBtn = document.getElementById("getByIdBtn");
+    const originalBtnText = getByIdBtn.innerHTML;
+    getByIdBtn.innerHTML = '<div class="loading"></div> Searching...';
+    getByIdBtn.disabled = true;
+
+    showMessage("getByIdMessage", "Loading repository details...", "info");
+
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/repository/${id}`);
+      if (response.status === 404) {
+        throw new Error("Repository not found");
+      }
+      if (!response.ok) throw new Error("Failed to fetch repository");
+      const repo = await response.json();
+
+      hideMessage("getByIdMessage");
+      document.getElementById("repoId").textContent = repo.id;
+      document.getElementById("repoImageName").textContent = repo.image_name;
+      document.getElementById("repoTag").textContent = repo.tag;
+      detailsDiv.style.display = "block";
+    } catch (error) {
+      showMessage("getByIdMessage", error.message, "error");
+      emptyState.style.display = "block";
+    } finally {
+      getByIdBtn.innerHTML = originalBtnText;
+      getByIdBtn.disabled = false;
+    }
+  });
+
+  // Clear functionality for Get By ID tab
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    document.getElementById("getByIdInput").value = "";
+    document.getElementById("repoDetails").style.display = "none";
+    hideMessage("getByIdMessage");
+    document.getElementById("emptySearchState").style.display = "block";
+  });
+
+  // Helper to show messages
+  function showMessage(id, message, type) {
+    const el = document.getElementById(id);
+    if (!message) {
+      el.style.display = "none";
+      el.textContent = "";
+      return;
+    }
+    
+    el.style.display = "flex";
+    el.innerHTML = `
+      <i class="fas fa-${type === "error" ? "exclamation-circle" : 
+                       type === "success" ? "check-circle" : "info-circle"}"></i>
+      ${message}
+    `;
+    el.className = `message ${type}`;
+  }
+  
+  function hideMessage(id) {
+    const el = document.getElementById(id);
+    el.style.display = "none";
+    el.textContent = "";
+    el.className = "message";
+  }
+
+  // Initialize empty states
+  document.getElementById("emptySearchState").style.display = "block";
+</script>
+
+</body>
+</html>
